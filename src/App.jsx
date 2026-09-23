@@ -2,23 +2,26 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import './App.css'
 
+const HOST_IP = import.meta.env.VITE_HOST_IP
+
 function App() {
     const { identifier } = useParams()
     const [stampCount, setStampCount] = useState(0)
     const [stampsRequired, setStampsRequired] = useState(10)
     const [shopName, setShopName] = useState("")
     const [redeemCode, setRedeemCode] = useState(null)
-    const [customerName, setCustomerName] = useState("")
-    const [nameInput, setNameInput] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
 
     function loadCardData() {
-        fetch(`https://192.168.1.148:8000/api/card/${identifier}`)
+        fetch(`https://${HOST_IP}:8000/api/card/${identifier}`)
             .then(response => response.json())
             .then(data => {
                 setStampCount(data.stamp_count)
                 setStampsRequired(data.stamps_required)
                 setShopName(data.shop_name)
-                setCustomerName(data.customer_name || null)
+                setFirstName(data.first_name)
+                setLastName(data.last_name)
                 if (data.stamp_count < data.stamps_required) {
                     setRedeemCode(null)
                 } else if (data.active_redeem_code) {
@@ -27,27 +30,14 @@ function App() {
             })
     }
 
+
     function redeemReward() {
-        fetch(`https://192.168.1.148:8000/api/card/${identifier}/generate-code`, {
+        fetch(`https://${HOST_IP}:8000/api/card/${identifier}/generate-code`, {
             method: 'POST'
         })
             .then(response => response.json())
             .then(data => {
                 setRedeemCode(data.code)
-            })
-    }
-
-    function submitName() {
-        if (!nameInput.trim()) return
-
-        fetch(`https://192.168.1.148:8000/api/card/${identifier}/set-name`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `name=${encodeURIComponent(nameInput)}`
-        })
-            .then(response => response.json())
-            .then(data => {
-                setCustomerName(data.name)
             })
     }
 
@@ -61,26 +51,10 @@ function App() {
         return () => clearInterval(interval)
     }, [])
 
-
-
-
-
     return (
         <div className="page">
             <div className="stamp-card">
                 <h1 className="wordmark">MFS</h1>
-                {!customerName && (
-                    <div className="name-prompt">
-                        <p>Welcome! What's your full name?</p>
-                        <input
-                            type="text"
-                            value={nameInput}
-                            onChange={(e) => setNameInput(e.target.value)}
-                            placeholder="Enter your name"
-                        />
-                        <button onClick={submitName}>Save</button>
-                    </div>
-                )}
 
                 <div className="stamp-strip">
                     {Array.from({ length: stampsRequired }).map((_, i) => (
@@ -93,13 +67,15 @@ function App() {
                 <div className="info-row">
                     <div>
                         <p className="info-label">NAME</p>
-                        <p className="info-value">{customerName || "Guest"}</p>
+                        <p className="info-value">{firstName} {lastName}</p>
                     </div>
                     <div className="info-right">
                         <p className="info-label">STAMPS</p>
                         <p className="info-value">{stampCount}</p>
                     </div>
                 </div>
+
+
 
                 {stampCount >= stampsRequired ? (
                     <div className="reward-section">
