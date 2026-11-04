@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './App.css'
-
-const HOST_IP = import.meta.env.VITE_HOST_IP
+import { API_URL } from './config'
 
 function Onboard() {
     const { shopId } = useParams()
@@ -14,7 +13,7 @@ function Onboard() {
     function submitOnboarding() {
         if (!firstName.trim() || !lastName.trim() || !phoneNumber.trim()) return
 
-        fetch(`https://${HOST_IP}:8000/api/onboard/${shopId}`, {
+        fetch(`${API_URL}/api/onboard/${shopId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `first_name=${encodeURIComponent(firstName)}&last_name=${encodeURIComponent(lastName)}&phone_number=${encodeURIComponent(phoneNumber)}`

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import './App.css'
+import { API_URL } from './config'
 
-const HOST_IP = import.meta.env.VITE_HOST_IP
 
 function Wallet() {
     const { identifier } = useParams()
     const [walletLink, setWalletLink] = useState(null)
 
     useEffect(() => {
-        fetch(`https://${HOST_IP}:8000/api/card/${identifier}/wallet-link`)
+        fetch(`${API_URL}/api/card/${identifier}/wallet-link`)
             .then(response => response.json())
             .then(data => {
                 setWalletLink(data.wallet_link)
